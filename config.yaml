@@ -1,0 +1,41 @@
+# Data Configuration
+data:
+  google_reviews_file: "data/raw/Google_12_months.xlsx"
+  trustpilot_reviews_file: "data/raw/Trustpilot_12_months.xlsx"
+  google_text_column: "Comment"
+  google_rating_column: "Overall Rating"
+  trustpilot_text_column: "Review Content"
+  trustpilot_rating_column: "Stars"
+
+# Filtering
+negative_review_threshold:
+  google: 3  # < 3 is negative
+  trustpilot: 3  # < 3 is negative
+
+# Topic Modelling - BERTopic
+bertopic:
+  num_topics: 10
+  min_topic_size: 10
+  language: "english"
+  calculate_probabilities: true
+
+# Topic Modelling - LDA
+lda:
+  num_topics: 10
+  passes: 10
+  workers: 4
+
+# Emotion Analysis
+emotion:
+  model_name: "bhadresh-savani/bert-base-uncased-emotion"
+
+# LLM - Falcon-7B-Instruct
+falcon:
+  model_name: "tiiuae/falcon-7b-instruct"
+  max_length: 1000
+
+# Output
+output:
+  report_dir: "reports/"
+  visualisation_dir: "visualisations/"
+  processed_data_dir: "data/processed/"
