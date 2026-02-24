@@ -1,41 +1,137 @@
-# Data Configuration
-data:
-  google_reviews_file: "data/raw/Google_12_months.xlsx"
-  trustpilot_reviews_file: "data/raw/Trustpilot_12_months.xlsx"
-  google_text_column: "Comment"
-  google_rating_column: "Overall Rating"
-  trustpilot_text_column: "Review Content"
-  trustpilot_rating_column: "Stars"
+distil:
+  conversation:
+    assistant_content: '1. [Operations/Gym Managers]: Facility Cleanliness - Implement
+      twice-daily deep cleaning schedules with visible completion checklists for changing
+      rooms to address poor cleanliness standards.
 
-# Filtering
-negative_review_threshold:
-  google: 3  # < 3 is negative
-  trustpilot: 3  # < 3 is negative
+      2. [Operations/Gym Managers]: Equipment Maintenance - Establish weekly locker
+      inspection and repair protocol with replacement target of 48 hours to eliminate
+      broken locker complaints.
 
-# Topic Modelling - BERTopic
-bertopic:
-  num_topics: 10
-  min_topic_size: 10
-  language: "english"
-  calculate_probabilities: true
+      3. [Gym Managers/Customer Experience]: Staff Responsiveness - Introduce mandatory
+      response time standards (within 24 hours) for trainer communications and implement
+      tracking system to monitor compliance.
 
-# Topic Modelling - LDA
-lda:
-  num_topics: 10
-  passes: 10
-  workers: 4
+      4. [Gym Managers]: Staff Punctuality - Deploy automated check-in system for
+      trainers with penalties for tardiness to ensure reliable session delivery.
 
-# Emotion Analysis
-emotion:
-  model_name: "bhadresh-savani/bert-base-uncased-emotion"
+      5. [Executive/Customer Experience]: App Stability - Conduct urgent technical
+      audit of mobile app class booking functionality and allocate emergency budget
+      for server capacity upgrades to prevent crashes.'
+    few_shot_prompt: '1. Facility Issues: Cleanliness is poor and lockers are broken.
 
-# LLM - Falcon-7B-Instruct
-falcon:
-  model_name: "tiiuae/falcon-7b-instruct"
-  max_length: 1000
+      2. Staff Behavior: Trainers are often late or unresponsive.
 
-# Output
-output:
-  report_dir: "reports/"
-  visualisation_dir: "visualisations/"
-  processed_data_dir: "data/processed/"
+      3. Technical Problems: The app crashes during class bookings.'
+    system_content: "You are a senior strategic consultant. You will be provided with\
+      \ a series of thematic actionable insights from various gym locations. Your\
+      \ task is to synthesise these into the TOP 10 KEY actionable insights tailored\
+      \ to specific stakeholders. Consolidate similar points to avoid redundancy.\
+      \ \n\nSTAKEHOLDERS & THEIR NEEDS:\n\u2022 Executive Leadership >> Strategic\
+      \ gaps, financial impact\n\u2022 Operations Managers >> Resource allocation,\
+      \ location priorities\n\u2022 Customer Experience >> Service touchpoint failures\n\
+      \u2022 Marketing Team >> Brand perception vs. reality\n\u2022 Gym Managers >>\
+      \ Day-to-day operational fixes\n\nProvide insights that address root causes\
+      \ and specify which stakeholder(s) should act.\n\nFormat (STRICT):\n1. [Stakeholder]:\
+      \ Theme - Actionable insight.\n2. [Stakeholder]: Theme - Actionable insight.\n\
+      3. [Stakeholder]: Theme - Actionable insight.\n4. [Stakeholder]: Theme - Actionable\
+      \ insight.\n5. [Stakeholder]: Theme - Actionable insight.\n...(continue to 10)"
+    user_content: 'Below is the consolidated list of intermediate insights from all
+      topics extracted from negative reviews. Please synthesise them into the final
+      10 strategic priorities: '
+  model: phi4
+  n_ctx: 4096
+  n_predict: 500
+  temperature: 0.2
+emotion_analysis:
+  batch_size: 32
+  device: 0
+  model: bhadresh-savani/bert-base-uncased-emotion
+  n_emotions: 1
+  padding: true
+  pipeline: text-classification
+  truncation: true
+focus_strategy:
+  angry_reviews: anger
+  n_common_worst_locations: 30
+  n_worst_locations: 20
+  neg_review_threshold: 3
+frequency_distribution:
+  max_words_wc: 500
+  n_most_common: 10
+  noise_words: minimise
+insights:
+  conversation:
+    assistant_content: '1. Equipment Maintenance: Establish a daily pre-opening inspection
+      log for cardio machines.
+
+      2. Hygiene Standards: Increase cleaning frequency in the free-weights area during
+      off-peak hours.
+
+      3. Staffing Coverage: Review morning shift schedules to ensure at least one
+      staff member is present for opening.'
+    few_shot_prompt: '[''Broken treadmills'', ''Dusty weights'', ''No staff at 6am'']'
+    system_content: "You are an expert data scientist specialising in gym industry\
+      \ consumer insights. Analyse negative review topics and provide 10 actionable\
+      \ insights tailored to specific stakeholders.\n\nSTAKEHOLDERS & THEIR NEEDS:\n\
+      \u2022 Executive Leadership >> Strategic gaps, financial impact\n\u2022 Operations\
+      \ Managers >> Resource allocation, location priorities\n\u2022 Customer Experience\
+      \ >> Service touchpoint failures\n\u2022 Marketing Team >> Brand perception\
+      \ vs. reality\n\u2022 Gym Managers >> Day-to-day operational fixes\n\nProvide\
+      \ insights that address root causes and specify which stakeholder(s) should\
+      \ act.\n\nFormat (STRICT):\n1. [Stakeholder]: Theme - Actionable insight.\n\
+      2. [Stakeholder]: Theme - Actionable insight.\n3. [Stakeholder]: Theme - Actionable\
+      \ insight.\n4. [Stakeholder]: Theme - Actionable insight.\n5. [Stakeholder]:\
+      \ Theme - Actionable insight.\n...(continue to 10)"
+    user_content: For the following text topics obtained from negative customer reviews,
+      can you give some actionable insights that would help this gym company?
+  model: phi4
+  n_ctx: 4096
+  n_predict: 500
+  temperature: 0.2
+  topic_chunk_size: 1000
+missing_value_strategy:
+  missing_locations: nan
+  missing_reviews: remove
+randomness_strategy:
+  seed: 42
+review_preprocessing_strategy:
+  HTML: remove
+  digits: remove
+  lower_case: 'yes'
+  non-ASCII: remove
+  punctuation: remove
+  stop_words: remove
+  tokenization: nltk.tokenize.word_tokenize
+topic_modelling:
+  bertopic:
+    calculate_probabilities: true
+    language: multilingual
+    n_clusters: 10
+    n_topics: 200
+    outlier_handling: embeddings
+    top_n_topics: 5
+    verbose: true
+  gensim:
+    num_topics: 10
+    outlier_handling: null
+    passes: 20
+  ollama:
+    conversation:
+      assistant_content: '1. Rusty equipment
+
+        2. Instructor lateness
+
+        3. Poor maintenance'
+      few_shot_prompt: The weights were rusty and the instructor was 20 minutes late.
+      system_content: You extract topics from customer reviews.No explanations. No
+        colons. No sentences. No labels. No code blocks.Output MUST be a numbered
+        list format, with each one on a new line.
+      user_content: 'In the following customer review, pick out the main 3 topics.
+        Return them in a numbered list format, with each one on a new line: '
+    max_review_length: 1000
+    model: phi4
+    n_ctx: 2048
+    n_predict: 250
+    review_chunk_size: 100
+    temperature: 0
